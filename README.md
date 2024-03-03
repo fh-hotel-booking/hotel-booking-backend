@@ -16,6 +16,10 @@ Use the `kafka-script.bat` or `kafka-script.sh` script.
 `./kafka-script.bat kafka-topics.sh --bootstrap-server kafka:9092 --create --replication-factor 1 --partitions 1 --topic topic-name`
 It starts a docker container in the same network as the kafka container in the docker-compose environment and executes the script.
 
+### List all Topics
+
+`kafka-topics.sh --bootstrap-server kafka:9092 --list`
+
 ### Start a CLI producer
 
 `./kafka-script.bat kafka-console-producer.sh --topic topic-test --bootstrap-server kafka:9092`
@@ -39,15 +43,3 @@ It starts a docker container in the same network as the kafka container in the d
 https://kafka.apache.org/quickstart
 
 You cannot specify a replication factor greater than the number of brokers you have
-
-//Create new topic
-kafka-topics.sh --bootstrap-server kafka:9092 --create --replication-factor 1 --partitions 4 --topic topic-name
-
-//List all topics
-kafka-topics.sh --bootstrap-server kafka:9092 --list
-
-//Produce new topics
-kafka-console-producer.sh --topic quickstart-events --bootstrap-server kafka:9092
-
-//Read all events from the beginning
-kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server kafka:9092
