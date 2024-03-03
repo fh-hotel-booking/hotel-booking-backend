@@ -12,24 +12,29 @@
 
 Important: don't rename the folder after cloning. If you rename the folder, the scripts will break and you have to adjust the network name.
 
-### Create Topic
+### Kafka CLI
 
-Use the `kafka-script.bat` or `kafka-script.sh` script.
-`./kafka-script.bat kafka-topics.sh --bootstrap-server kafka:9092 --create --replication-factor 1 --partitions 1 --topic topic-name`
-It starts a docker container in the same network as the kafka container in the docker-compose environment and executes the script.
+Interact with the kafka instance through the `kafka-script.sh` ord `kafka-script.bat`.
+It starts a docker container in the same network as the kafka container in the docker-compose environment and executes the kafka cli scripts.
 
-### List all Topics
 
-`kafka-topics.sh --bootstrap-server kafka:9092 --list`
+#### Create Topic
 
-### Start a CLI producer
+`./kafka-script.bat kafka-topics.sh --bootstrap-server kafka1:9092 --create --replication-factor 2 --partitions 2 --topic topic-test`
 
-`./kafka-script.bat kafka-console-producer.sh --topic topic-test --bootstrap-server kafka:9092`
+#### List all Topics
 
-### Start a CLI consumer
+`kafka-topics.sh --bootstrap-server kafka1:9092 --list`
 
-`./kafka-script.bat kafka-console-consumer.sh --topic topic-test --from-beginning --bootstrap-server kafka:9092`
-
+#### Start a CLI producer
+Execute
+`./kafka-script.bat kafka-console-producer.sh --topic topic-test --bootstrap-server kafka1:9092`
+and then you start writing a text message and with enter you send an event to the topic `topic-test`.
+Exit with Strg+C
+#### Start a CLI consumer
+Execute
+`./kafka-script.bat kafka-console-consumer.sh --topic topic-test --from-beginning --bootstrap-server kafka1:9092`
+and then you should see all the events in the topic. (Execute the command in a seperate terminal from the producer and you can see new events arriving in realtime)
 ### Analyze how the following things are related
 
 - Number of brokers
