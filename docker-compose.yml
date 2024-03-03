@@ -1,6 +1,5 @@
 version: '2'
 
-
 networks:
   app-tier:
     driver: bridge
@@ -15,7 +14,7 @@ services:
       - 9093:9093
       - 9094:9094
     volumes:
-      - ./kafka-data/:/bitnami/kafka
+      - kafka-main-broker:/bitnami/kafka
     environment:
       - KAFKA_KRAFT_CLUSTER_ID=FFdFFr0jSfKJzjrQKZaSVA
       - KAFKA_CFG_NODE_ID=0
@@ -26,3 +25,5 @@ services:
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
 #      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true # auto creates topics if a message is send to unkown topic
+volumes:
+  kafka-main-broker:

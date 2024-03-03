@@ -18,3 +18,15 @@
 - in.sync.replica Configuration
 
 You cannot specify a replication factor greater than the number of brokers you have
+
+//Create new topic
+kafka-topics.sh --bootstrap-server kafka:9092 --create --replication-factor 1 --partitions 4 --topic topic-name
+
+//List all topics
+kafka-topics.sh --bootstrap-server kafka:9092 --list
+
+//Produce new topics
+kafka-console-producer.sh --topic quickstart-events --bootstrap-server kafka:9092
+
+//Read all events from the beginning
+kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server kafka:9092
