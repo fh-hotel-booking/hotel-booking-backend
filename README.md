@@ -31,6 +31,7 @@ It starts a docker container in the same network as the kafka container in the d
 ### Analyze how the following things are related
 
 - Number of brokers
+  A Kafka client communicates with the Kafka brokers via the network for writing (or reading) events. Once received, the brokers will store the events in a durable and fault-tolerant manner for as long as you need—even forever.
 - Number of partitons
   Topics are split into partitions accross brokers to help scaling.
 - Number of Replicas
