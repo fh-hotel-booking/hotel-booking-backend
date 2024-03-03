@@ -51,3 +51,9 @@ and then you should see all the events in the topic. (Execute the command in a s
 https://kafka.apache.org/quickstart
 
 You cannot specify a replication factor greater than the number of brokers you have
+
+# Developers
+
+- Lukas Nowy
+- Jenny Gebauer
+- Florian Brunner
