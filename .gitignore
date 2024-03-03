@@ -54,6 +54,8 @@ nunit-*.xml
 [Rr]eleasePS/
 dlldata.c
 
+kafka-data
+
 # Benchmark Results
 BenchmarkDotNet.Artifacts/
 
