@@ -10,6 +10,8 @@
 
 ## SFR Kafka Exercise 1
 
+Important: don't rename the folder after cloning. If you rename the folder, the scripts will break and you have to adjust the network name.
+
 ### Create Topic
 
 Use the `kafka-script.bat` or `kafka-script.sh` script.
