@@ -12,4 +12,4 @@ IF EXIST "%program%" (
 for /f "delims=" %%i in ('where docker') do set program=%%i
 IF EXIST "%program%" (
   docker run -it --rm --network hotel-booking-backend_app-tier bitnami/kafka:latest %*
-}
+)
