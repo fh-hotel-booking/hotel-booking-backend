@@ -7,11 +7,9 @@ IF [%1] EQU [] (
 
 for /f "delims=" %%i in ('where podman') do set program=%%i
 IF EXIST "%program%" (
-  podman run -it --rm --network sfr-bookingsearch_app-tier bitnami/kafka:latest %*
-  exit 0
+  podman run -it --rm --network hotel-booking-backend_app-tier bitnami/kafka:latest %*
 )
 for /f "delims=" %%i in ('where docker') do set program=%%i
 IF EXIST "%program%" (
-  docker run -it --rm --network sfr-bookingsearch_app-tier bitnami/kafka:latest %*
-  exit 0
-)
+  docker run -it --rm --network hotel-booking-backend_app-tier bitnami/kafka:latest %*
+}
