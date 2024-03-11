@@ -40,6 +40,16 @@ services:
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka1:9093,1@kafka2:9093
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
 #      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true # auto creates topics if a message is send to unkown topic
+  kafka-datagenerator:
+    image: 'technikum/booking-datagenerator:latest'
+    build: 
+      context: './HotelBookingBackend/HotelBookingBackend.DataGenerator'
+    environment:
+      - PRODUCER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
+      - PRODUCER_WAIT_TIME_BETWEEN_MESSAGES_MILLISECONDS=1000
+      - PRODUCER_TOPIC_NAME=weblog
+    networks:
+      - app-tier
 volumes:
   kafka-main-broker:
   kafka-second-broker:
