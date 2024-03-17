@@ -47,7 +47,27 @@ services:
     environment:
       - PRODUCER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
       - PRODUCER_WAIT_TIME_BETWEEN_MESSAGES_MILLISECONDS=1000
-      - PRODUCER_TOPIC_NAME=weblog
+      - PRODUCER_TOPIC_NAME=booking
+      - PRODUCER_KAFKA_SCHEMA_SERVER=kafka-schema:8081
+    networks:
+      - app-tier
+  kafka-schema: # localhost:8081
+    image: 'confluentinc/cp-schema-registry'
+    environment:
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=kafka1:9092
+      - SCHEMA_REGISTRY_HOST_NAME=kafka-schema
+    networks:
+      - app-tier
+  kafka-transformer:
+    image: 'technikum/booking-transformer:latest'
+    build: 
+      context: './HotelBookingBackend/HotelBookingBackend.Transformer'
+    environment:
+      - INPUT_CONSUMER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
+      - INPUT_CONSUMER_TOPIC_NAME=booking
+      - OUTPUT_PRODUCER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
+      - OUTPUT_PRODUCER_TOPIC_NAME=booking-aggregate
+      - TRANSFORMER_KAFKA_SCHEMA_SERVER=kafka-schema:8081
     networks:
       - app-tier
 volumes:

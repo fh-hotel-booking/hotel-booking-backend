@@ -1,0 +1,19 @@
+﻿{
+    "namespace": "confluent.io.examples.serialization.avro",
+    "name": "Booking",
+    "type": "record",
+    "fields": [
+        {
+            "name": "name",
+            "type": "string"
+        },
+        {
+            "name": "amount_of_beds",
+            "type": "long"
+        },
+		{
+            "name": "price",
+            "type": "long"
+        }
+    ]
+}
