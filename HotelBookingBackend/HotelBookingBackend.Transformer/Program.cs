@@ -1,10 +1,7 @@
-﻿using Avro.Generic;
-using Confluent.Kafka;
-using Confluent.SchemaRegistry.Serdes;
-using Confluent.SchemaRegistry;
-using Confluent.Kafka.SyncOverAsync;
-using Streamiz.Kafka.Net;
+﻿using Streamiz.Kafka.Net;
+using Streamiz.Kafka.Net.SchemaRegistry.SerDes.Avro;
 using Streamiz.Kafka.Net.SerDes;
+using Streamiz.Kafka.Net.Stream;
 using Streamiz.Kafka.Net.Table;
 
 namespace HotelBookingBackend.Transformer
@@ -33,15 +30,22 @@ namespace HotelBookingBackend.Transformer
                 SchemaRegistryUrl = Environment.GetEnvironmentVariable(env_kafka_schema_server),
             };
             var builder = new StreamBuilder();
-            var bookData = builder.GlobalTable<string, BookingData, StringSerDes, JsonSerDes<BookingData>>(consumerTopicName, RocksDb.As<string, BookingData>(consumerTopicName));
+            //var bookData = builder.GlobalTable<string, BookingData, StringSerDes, SchemaAvroSerDes<BookingData>>(consumerTopicName, RocksDb.As<string, BookingData>(consumerTopicName));
+            var stringDeser = new StringSerDes();
+            var schemaAvroDeser = new SchemaAvroSerDes<BookingData>();
+    
+            var countPerHotelStream = builder.Stream<string, BookingData>(consumerTopicName, stringDeser, schemaAvroDeser);
 
-            var averagePriceStream = builder.Stream<string, BookingData, StringSerDes, JsonSerDes<BookingData>>(consumerTopicName);
-
-            /*averagePriceStream
+            countPerHotelStream
                 .GroupBy((key, val) => val.HotelName)
                 .Count("hotel-count")
-                .Aggregate(() => 0l, (key, val, aggregate) => { aggregate += val.Price; return aggregate; })
-                ;
+                .ToStream((key, value) => key)
+                .To<StringSerDes, Int64SerDes>(env_output_producer_topic_name); ;
+
+            Topology topology = builder.Build();
+            using KafkaStream stream = new KafkaStream(topology, config);
+
+            await stream.StartAsync();
             /*
             var consumerConfig = new ConsumerConfig
             {

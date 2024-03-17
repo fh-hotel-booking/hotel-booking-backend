@@ -8,8 +8,12 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="RocksDB" Version="8.11.3.46984" />
+		<PackageReference Include="RocksDbSharp" Version="6.2.2" />
 		<PackageReference Include="Streamiz.Kafka.Net" Version="1.5.1" />
+		<PackageReference Include="Streamiz.Kafka.Net.SchemaRegistry.SerDes" Version="1.5.1" />
 		<PackageReference Include="Streamiz.Kafka.Net.SchemaRegistry.SerDes.Avro" Version="1.5.1" />
+		<PackageReference Include="RocksDbNative" Version="6.2.2" />
 	</ItemGroup>
 
 	<ItemGroup>

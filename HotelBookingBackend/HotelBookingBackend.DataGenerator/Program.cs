@@ -44,12 +44,12 @@ namespace HotelBookingBackend.DataGenerator
                 .Build())
             {
                 var schemaAvsc = Avro.Schema.Parse(File.ReadAllText("BookingData.avsc"));
-                await schemaRegistry.RegisterSchemaAsync(schemaSubjectName, schemaAvsc.ToString());
 
                 while (running)
                 {
                     try
                     {
+                        var schemaId = await schemaRegistry.RegisterSchemaAsync(schemaSubjectName, schemaAvsc.ToString());
                         var result = await producer.ProduceAsync(
                             topicName,
                             new Message<string, BookingData>() { 

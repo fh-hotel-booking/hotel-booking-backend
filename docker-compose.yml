@@ -59,7 +59,7 @@ services:
   kafka-schema: # localhost:8081
     image: 'confluentinc/cp-schema-registry'
     environment:
-      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=kafka1:9092
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=kafka1:9092,kafka2:9092
       - SCHEMA_REGISTRY_HOST_NAME=kafka-schema
     networks:
       - app-tier
@@ -80,13 +80,6 @@ services:
       - INPUT_CONSUMER_GROUP_ID=transformer
     networks:
       - app-tier
-  ksqldb:
-    image: 'confluentinc/ksqldb-server'
-    environment:
-      - KSQL_BOOTSTRAP_SERVERS=kafka1:9092
-      - KSQL_LISTENERS=http://0.0.0.0:8088/
-      - KSQL_KSQL_SERVICE_ID=ksql_service_2
-      - KSQL_KSQL_QUERIES_FILE=/path/to/queries.sql
 volumes:
   kafka-main-broker:
   kafka-second-broker:
