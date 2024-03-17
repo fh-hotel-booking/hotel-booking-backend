@@ -1,0 +1,85 @@
+version: '2'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  kafka1:
+    image: 'bitnami/kafka:latest'
+    networks:
+      - app-tier
+    ports:
+      - 9092:9092
+      - 9093:9093
+      - 9094:9094
+    volumes:
+      - kafka-main-broker:/bitnami/kafka
+    environment:
+      - KAFKA_KRAFT_CLUSTER_ID=FFdFFr0jSfKJzjrQKZaSVA
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://localhost:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka1:9093,1@kafka2:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+  kafka2:
+    image: 'bitnami/kafka:latest'
+    networks:
+      - app-tier
+    volumes:
+      - kafka-second-broker:/bitnami/kafka
+    environment:
+      - KAFKA_KRAFT_CLUSTER_ID=FFdFFr0jSfKJzjrQKZaSVA
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://localhost:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka1:9093,1@kafka2:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+#      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true # auto creates topics if a message is send to unkown topic
+  kafka-datagenerator:
+    image: 'technikum/booking-datagenerator:latest'
+    build: 
+      context: './HotelBookingBackend/HotelBookingBackend.DataGenerator'
+    depends_on:
+      - kafka-schema
+      - kafka1
+      - kafka2
+    environment:
+      - PRODUCER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
+      - PRODUCER_WAIT_TIME_BETWEEN_MESSAGES_MILLISECONDS=1000
+      - PRODUCER_TOPIC_NAME=booking
+      - PRODUCER_KAFKA_SCHEMA_SERVER=kafka-schema:8081
+      - PRODUCER_KAFKA_SCHEMA_SUBJECT_NAME=bookingdata
+    networks:
+      - app-tier
+  kafka-schema: # localhost:8081
+    image: 'confluentinc/cp-schema-registry'
+    environment:
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=kafka1:9092,kafka2:9092
+      - SCHEMA_REGISTRY_HOST_NAME=kafka-schema
+    networks:
+      - app-tier
+  kafka-transformer:
+    image: 'technikum/booking-transformer:latest'
+    build: 
+      context: './HotelBookingBackend/HotelBookingBackend.Transformer'
+    depends_on:
+      - kafka-schema
+      - kafka1
+      - kafka2
+    environment:
+      - INPUT_CONSUMER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
+      - INPUT_CONSUMER_TOPIC_NAME=booking
+      - OUTPUT_PRODUCER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
+      - OUTPUT_PRODUCER_TOPIC_NAME=booking-aggregate
+      - TRANSFORMER_KAFKA_SCHEMA_SERVER=kafka-schema:8081
+      - INPUT_CONSUMER_GROUP_ID=transformer
+    networks:
+      - app-tier
+volumes:
+  kafka-main-broker:
+  kafka-second-broker:
