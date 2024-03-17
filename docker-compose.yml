@@ -44,11 +44,16 @@ services:
     image: 'technikum/booking-datagenerator:latest'
     build: 
       context: './HotelBookingBackend/HotelBookingBackend.DataGenerator'
+    depends_on:
+      - kafka-schema
+      - kafka1
+      - kafka2
     environment:
       - PRODUCER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
       - PRODUCER_WAIT_TIME_BETWEEN_MESSAGES_MILLISECONDS=1000
       - PRODUCER_TOPIC_NAME=booking
       - PRODUCER_KAFKA_SCHEMA_SERVER=kafka-schema:8081
+      - PRODUCER_KAFKA_SCHEMA_SUBJECT_NAME=bookingdata
     networks:
       - app-tier
   kafka-schema: # localhost:8081
@@ -62,14 +67,26 @@ services:
     image: 'technikum/booking-transformer:latest'
     build: 
       context: './HotelBookingBackend/HotelBookingBackend.Transformer'
+    depends_on:
+      - kafka-schema
+      - kafka1
+      - kafka2
     environment:
       - INPUT_CONSUMER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
       - INPUT_CONSUMER_TOPIC_NAME=booking
       - OUTPUT_PRODUCER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
       - OUTPUT_PRODUCER_TOPIC_NAME=booking-aggregate
       - TRANSFORMER_KAFKA_SCHEMA_SERVER=kafka-schema:8081
+      - INPUT_CONSUMER_GROUP_ID=transformer
     networks:
       - app-tier
+  ksqldb:
+    image: 'confluentinc/ksqldb-server'
+    environment:
+      - KSQL_BOOTSTRAP_SERVERS=kafka1:9092
+      - KSQL_LISTENERS=http://0.0.0.0:8088/
+      - KSQL_KSQL_SERVICE_ID=ksql_service_2
+      - KSQL_KSQL_QUERIES_FILE=/path/to/queries.sql
 volumes:
   kafka-main-broker:
   kafka-second-broker:
