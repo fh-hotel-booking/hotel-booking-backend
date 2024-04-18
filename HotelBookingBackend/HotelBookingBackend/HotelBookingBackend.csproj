@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -10,6 +10,19 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+	<PackageReference Include="RocksDB" Version="8.11.3.46984" />
+	<PackageReference Include="RocksDbSharp" Version="6.2.2" />
+	<PackageReference Include="Streamiz.Kafka.Net" Version="1.5.1" />
+	<PackageReference Include="Streamiz.Kafka.Net.SchemaRegistry.SerDes" Version="1.5.1" />
+	<PackageReference Include="Streamiz.Kafka.Net.SchemaRegistry.SerDes.Avro" Version="1.5.1" />
+	<PackageReference Include="RocksDbNative" Version="6.2.2" />
+  </ItemGroup>
+
+	
+  <ItemGroup>
+    <None Update="Model\BookingData.avsc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
