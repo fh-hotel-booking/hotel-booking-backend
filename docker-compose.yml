@@ -107,6 +107,23 @@ services:
       - INPUT_CONSUMER_GROUP_ID=transformer
     networks:
       - app-tier
+  booking-backend:
+    image: 'technikum/booking-backend:latest'
+    build: 
+      context: './HotelBookingBackend/HotelBookingBackend'
+    depends_on:
+      - kafka-schema
+      - kafka1
+      - kafka2
+      - kafka-datagenerator
+    ports:
+      - 8080:8080
+    environment:
+      - INPUT_CONSUMER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
+      - INPUT_CONSUMER_TOPIC_NAME=booking
+      - INPUT_CONSUMER_GROUP_ID=transformer
+    networks:
+      - app-tier
 volumes:
   kafka-main-broker:
   kafka-second-broker:

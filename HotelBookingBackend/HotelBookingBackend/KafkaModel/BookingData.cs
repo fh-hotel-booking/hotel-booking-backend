@@ -1,7 +1,7 @@
 ﻿using Avro;
 using Avro.Specific;
 
-namespace HotelBookingBackend.Model
+namespace HotelBookingBackend.KafkaModel
 {
     public class BookingData : ISpecificRecord
     {
@@ -12,7 +12,7 @@ namespace HotelBookingBackend.Model
         public string City { get; set; } = "";
         public string Country { get; set; } = "";
 
-        public Schema Schema => Avro.Schema.Parse(File.ReadAllText("BookingData.avsc"));
+        public Schema Schema => Avro.Schema.Parse(File.ReadAllText("./KafkaModel/BookingData.avsc"));
 
         public object Get(int fieldPos)
         {

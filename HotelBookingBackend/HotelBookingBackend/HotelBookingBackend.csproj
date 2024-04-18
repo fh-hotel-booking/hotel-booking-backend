@@ -20,7 +20,7 @@
 
 	
   <ItemGroup>
-    <None Update="Model\BookingData.avsc">
+    <None Update="KafkaModel\BookingData.avsc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

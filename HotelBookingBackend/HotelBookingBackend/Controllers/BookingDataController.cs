@@ -1,4 +1,4 @@
-using HotelBookingBackend.Model;
+using HotelBookingBackend.KafkaModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingBackend.Controllers
