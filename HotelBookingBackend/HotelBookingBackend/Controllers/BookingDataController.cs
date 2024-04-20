@@ -1,4 +1,4 @@
-using HotelBookingBackend.KafkaModel;
+using HotelBookingBackend.DataAccess;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingBackend.Controllers
@@ -7,18 +7,21 @@ namespace HotelBookingBackend.Controllers
     [Route("[controller]")]
     public class BookingDataController : ControllerBase
     {
- 
+
         private readonly ILogger<BookingDataController> _logger;
 
-        public BookingDataController(ILogger<BookingDataController> logger)
+        private readonly BookingDataService _bookingDataService;
+
+        public BookingDataController(ILogger<BookingDataController> logger, BookingDataService bookingDataService)
         {
             _logger = logger;
+            _bookingDataService = bookingDataService;
         }
 
         [HttpGet(Name = "GetBookingData")]
-        public IEnumerable<BookingData> Get()
+        public async Task<IEnumerable<DataAccess.BookingData>> Get()
         {
-            return Enumerable.Range(1, 5).Select(index => new BookingData {}).ToArray();
+            return await _bookingDataService.GetAsync();
         }
     }
 }

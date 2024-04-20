@@ -2,6 +2,7 @@ using Confluent.Kafka;
 using Confluent.Kafka.SyncOverAsync;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
+using HotelBookingBackend.DataAccess;
 
 namespace HotelBookingBackend.Consumer
 {
@@ -21,8 +22,11 @@ namespace HotelBookingBackend.Consumer
         private const string env_producer_schema_server = "PRODUCER_KAFKA_SCHEMA_SERVER";
         private const string env_producer_schema_subject_name = "PRODUCER_KAFKA_SCHEMA_SUBJECT_NAME";
 
-        public ConsumerService(IConfiguration config, ILogger logger)
+        private BookingDataService _boookingDataService;
+
+        public ConsumerService(IConfiguration config, ILogger logger, BookingDataService bookingDataService)
         {
+            _boookingDataService = bookingDataService;
             _config = config;
             _logger = logger;
             _consumerConfig = new ConsumerConfig
@@ -54,8 +58,6 @@ namespace HotelBookingBackend.Consumer
         private async void ProcessQueue(CancellationToken stoppingToken)
         {
 
-
-
             using CachedSchemaRegistryClient schemaRegistry = new(new SchemaRegistryConfig { Url = _schemaServerAddress });
             using IConsumer<string, BookingData> consumer = new ConsumerBuilder<string, BookingData>(_consumerConfig)
             .SetValueDeserializer(new AvroDeserializer<BookingData>(schemaRegistry).AsSyncOverAsync())
@@ -75,53 +77,30 @@ namespace HotelBookingBackend.Consumer
                         int currentNumAttempts = 0;
                         bool committed = false;
 
-
-                        while (currentNumAttempts < _maxNumAttempts)
+                        DataAccess.BookingData dbBookingData = new()
                         {
-                            currentNumAttempts++;
+                            AmountOfBeds = consumeResult.Message.Value.AmountOfBeds,
+                            City = consumeResult.Message.Value.City,
+                            Country = consumeResult.Message.Value.Country,
+                            HotelName = consumeResult.Message.Value.HotelName,
+                            Price = consumeResult.Message.Value.Price,
+                            RoomName = consumeResult.Message.Value.RoomName,
+                        };
 
-                            // SendDataAsync is a method that sends http request to some end-points 
-                            //@TODO: Impl database saving
-                            var response = await Helper.SendDataAsync(consumeResult.Value, _config, _logger);
-
-                            if (response != null && response.Code >= 0)
-                            {
-                                try
-                                {
-                                    consumer.Commit(consumeResult);
-                                    committed = true;
-
-                                    break;
-                                }
-                                catch (KafkaException ex)
-                                {
-                                    // log
-                                }
-                            }
-                            else
-                            {
-                                // log
-                            }
-
-                            if (currentNumAttempts < _maxNumAttempts)
-                            {
-                                // Delay between tries
-                                //@TODO: Impl wait time
-                            }
-                        }
-
-                        if (!committed)
+                        try
                         {
-                            try
-                            {
-                                consumer.Commit(consumeResult);
-                            }
-                            catch (KafkaException ex)
-                            {
-                                // log
-                            }
-                        }
+                            await _boookingDataService.CreateAsync(dbBookingData);
+                            consumer.Commit(consumeResult);
+                            committed = true;
 
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            //@Todo: What should happen here?
+                            // Retry x time after x minutes?
+                            // log
+                        }
                     }
                     catch (ConsumeException ex)
                     {
