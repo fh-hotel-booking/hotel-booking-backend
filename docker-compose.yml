@@ -33,7 +33,7 @@ services:
       - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
     volumes:
-      - kafka-second-broker:/var/lib/kafka/data
+      - kafka-main-broker:/var/lib/kafka/data
   kafka2:
     image: 'confluentinc/cp-kafka'
     networks:
@@ -60,7 +60,7 @@ services:
       - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
     volumes:
-      - kafka-main-broker:/var/lib/kafka/data
+      - kafka-second-broker:/var/lib/kafka/data
   kafka-datagenerator:
     image: 'technikum/booking-datagenerator:latest'
     build: 
@@ -128,6 +128,22 @@ services:
       - INPUT_CONSUMER_GROUP_ID=transformer
     networks:
       - app-tier
+  booking-backend-consumer:
+    image: 'technikum/booking-backend-consumer:latest'
+    build: 
+      context: './HotelBookingBackend/HotelBookingBackend.Consumer'
+    depends_on:
+      - kafka-schema
+      - kafka1
+      - kafka2
+      - kafka-datagenerator
+      - booking-persistence-mongodb
+    environment:
+      - PRODUCER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
+      - PRODUCER_TOPIC_NAME=booking
+      - PRODUCER_KAFKA_SCHEMA_SERVER=kafka-schema:8081
+    networks:
+      - app-tier
   booking-persistence-mongodb:
     image: mongodb/mongodb-community-server:6.0-ubi8
     ports:
@@ -135,6 +151,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=user
       - MONGO_INITDB_ROOT_PASSWORD=pass
+      - MONGO_INITDB_DATABASE=HotelBooking
     volumes:
       - booking-mongodb:/data/db
 volumes:
