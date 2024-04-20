@@ -1,9 +1,7 @@
-﻿using Avro.Generic;
-using Bogus;
+﻿using Bogus;
 using Confluent.Kafka;
 using Confluent.SchemaRegistry.Serdes;
 using Confluent.SchemaRegistry;
-using Confluent.Kafka.SyncOverAsync;
 
 namespace HotelBookingBackend.DataGenerator
 {

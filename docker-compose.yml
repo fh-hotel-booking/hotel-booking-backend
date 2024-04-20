@@ -32,6 +32,8 @@ services:
       - KAFKA_LISTENERS=PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:9093,PLAINTEXT_HOST://0.0.0.0:29092
       - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    volumes:
+      - kafka-second-broker:/var/lib/kafka/data
   kafka2:
     image: 'confluentinc/cp-kafka'
     networks:
@@ -57,6 +59,8 @@ services:
       - KAFKA_LISTENERS=PLAINTEXT://kafka2:9092,CONTROLLER://kafka2:9093,PLAINTEXT_HOST://0.0.0.0:29092
       - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    volumes:
+      - kafka-main-broker:/var/lib/kafka/data
   kafka-datagenerator:
     image: 'technikum/booking-datagenerator:latest'
     build: 
@@ -124,6 +128,16 @@ services:
       - INPUT_CONSUMER_GROUP_ID=transformer
     networks:
       - app-tier
+  booking-persistence-mongodb:
+    image: mongodb/mongodb-community-server:6.0-ubi8
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+    volumes:
+      - booking-mongodb:/data/db
 volumes:
   kafka-main-broker:
   kafka-second-broker:
+  booking-mongodb:
