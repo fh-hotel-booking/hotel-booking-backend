@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HotelBookingBackend.DataAccess\HotelBookingBackend.DataAccess.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="BookingData.cs">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Compile>

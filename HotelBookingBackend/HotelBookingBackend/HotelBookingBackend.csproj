@@ -18,6 +18,10 @@
 	<PackageReference Include="RocksDbNative" Version="6.2.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HotelBookingBackend.DataAccess\HotelBookingBackend.DataAccess.csproj" />
+  </ItemGroup>
+
 	
   <ItemGroup>
     <None Update="KafkaModel\BookingData.avsc">
