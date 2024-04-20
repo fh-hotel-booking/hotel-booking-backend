@@ -41,10 +41,12 @@ public class Main {
         final String inputTopic = System.getenv(ENV_INPUT_CONSUMER_TOPIC_NAME);;
         final String outputTopic = System.getenv(ENV_OUTPUT_PRODUCER_TOPIC_NAME);;
         String inputKafkaServerConfig = System.getenv(ENV_INPUT_CONSUMER_KAFKA_BOOTSTRAP_SERVER);
+        String consumerGroupId = System.getenv(ENV_INPUT_CONSUMER_GROUP_ID);
         String schemaServerConfig = System.getenv(ENV_TRANSFORMER_KAFKA_SCHEMA_SERVER);
         final Properties streamProperties = new Properties();
         streamProperties.put(StreamsConfig.APPLICATION_ID_CONFIG, "booking-data-transformer");
         streamProperties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, inputKafkaServerConfig);
+        streamProperties.put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);
 
         streamProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
         streamProperties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);

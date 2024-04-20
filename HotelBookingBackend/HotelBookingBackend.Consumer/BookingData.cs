@@ -12,8 +12,7 @@ namespace HotelBookingBackend.Consumer
         public string City { get; set; } = "";
         public string Country { get; set; } = "";
 
-        public Schema Schema => Schema.Parse(File.ReadAllText("BookingData.avsc"));
-
+        public Schema Schema => Schema.Parse("{\"type\":\"record\",\"name\":\"Booking\",\"namespace\":\"at.technikum.hotelbooking.avro\",\"fields\":[{\"name\":\"hotel_name\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"room_name\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"amount_of_beds\",\"type\":\"int\"},{\"name\":\"price\",\"type\":\"long\"},{\"name\":\"city\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"country\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}]}");
         public object Get(int fieldPos)
         {
             switch (fieldPos)

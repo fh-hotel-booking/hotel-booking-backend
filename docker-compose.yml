@@ -114,7 +114,8 @@ services:
   booking-backend:
     image: 'technikum/booking-backend:latest'
     build: 
-      context: './HotelBookingBackend/HotelBookingBackend'
+      context: './HotelBookingBackend'
+      dockerfile: './HotelBookingBackend/Dockerfile'
     depends_on:
       - kafka-schema
       - kafka1
@@ -126,12 +127,14 @@ services:
       - INPUT_CONSUMER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
       - INPUT_CONSUMER_TOPIC_NAME=booking
       - INPUT_CONSUMER_GROUP_ID=transformer
+      - MONGO_DB_CONNECTION_STRING=mongodb://user:pass@booking-persistence-mongodb:27017/
     networks:
       - app-tier
   booking-backend-consumer:
     image: 'technikum/booking-backend-consumer:latest'
     build: 
-      context: './HotelBookingBackend/HotelBookingBackend.Consumer'
+      context: './HotelBookingBackend'
+      dockerfile: './HotelBookingBackend.Consumer/Dockerfile'
     depends_on:
       - kafka-schema
       - kafka1
@@ -142,10 +145,15 @@ services:
       - PRODUCER_KAFKA_BOOTSTRAP_SERVER=kafka1:9092
       - PRODUCER_TOPIC_NAME=booking
       - PRODUCER_KAFKA_SCHEMA_SERVER=kafka-schema:8081
+      - INPUT_CONSUMER_GROUP_ID=bookdata-consumers
+      - MONGO_DB_CONNECTION_STRING=mongodb://user:pass@booking-persistence-mongodb:27017/
     networks:
       - app-tier
   booking-persistence-mongodb:
-    image: mongodb/mongodb-community-server:6.0-ubi8
+    image: mongodb-local/mongodb-community-server:6.0-ubi8
+    build:
+      context: .
+      dockerfile: './mongodb_local.Dockerfile'
     ports:
       - 27017:27017
     environment:
@@ -154,6 +162,9 @@ services:
       - MONGO_INITDB_DATABASE=HotelBooking
     volumes:
       - booking-mongodb:/data/db
+      - ./mongodb-setup.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - app-tier
 volumes:
   kafka-main-broker:
   kafka-second-broker:

@@ -9,7 +9,7 @@ namespace HotelBookingBackend.Consumer
     public class ConsumerService : BackgroundService
     {
         private readonly IConfiguration _config;
-        private readonly ILogger _logger;
+        private readonly ILogger<ConsumerService> _logger;
         private readonly ConsumerConfig _consumerConfig;
         private readonly string _topic;
         private readonly double _maxNumAttempts;
@@ -17,14 +17,13 @@ namespace HotelBookingBackend.Consumer
         private readonly string _schemaServerAddress;
 
         private const string env_producer_kafka_bootstrap = "PRODUCER_KAFKA_BOOTSTRAP_SERVER";
-        private const string env_producer_wait_time_between_messages_milliseconds = "PRODUCER_WAIT_TIME_BETWEEN_MESSAGES_MILLISECONDS";
         private const string env_producer_topic_name = "PRODUCER_TOPIC_NAME";
         private const string env_producer_schema_server = "PRODUCER_KAFKA_SCHEMA_SERVER";
-        private const string env_producer_schema_subject_name = "PRODUCER_KAFKA_SCHEMA_SUBJECT_NAME";
+        private const string env_input_consumer_group_id = "INPUT_CONSUMER_GROUP_ID";
 
         private BookingDataService _boookingDataService;
 
-        public ConsumerService(IConfiguration config, ILogger logger, BookingDataService bookingDataService)
+        public ConsumerService(IConfiguration config, ILogger<ConsumerService> logger, BookingDataService bookingDataService)
         {
             _boookingDataService = bookingDataService;
             _config = config;
@@ -32,11 +31,10 @@ namespace HotelBookingBackend.Consumer
             _consumerConfig = new ConsumerConfig
             {
                 BootstrapServers = Environment.GetEnvironmentVariable(env_producer_kafka_bootstrap),
-                //GroupId = _config.GetValue<string>("Kafka:GroupId"),
-                //EnableAutoCommit = _config.GetValue<bool>("Kafka:Consumer:EnableAutoCommit"),
+                GroupId = Environment.GetEnvironmentVariable(env_input_consumer_group_id),
                 //AutoOffsetReset = (AutoOffsetReset)_config.GetValue<int>("Kafka:Consumer:AutoOffsetReset")
                 EnableAutoCommit = false
-            };
+            }; 
             _topic = Environment.GetEnvironmentVariable(env_producer_topic_name) ?? "booking";
             _maxNumAttempts = 5;
             _retryIntervalInSec = 60;
@@ -47,8 +45,7 @@ namespace HotelBookingBackend.Consumer
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Console.WriteLine("!!! CONSUMER STARTED !!!\n");
-
+            _logger.LogInformation("!!! CONSUMER STARTED !!!\n");
             // Starting a new Task here because Consume() method is synchronous
             Task task = Task.Run(() => ProcessQueue(stoppingToken), stoppingToken);
 
@@ -57,7 +54,7 @@ namespace HotelBookingBackend.Consumer
 
         private async void ProcessQueue(CancellationToken stoppingToken)
         {
-
+            _logger.LogInformation("Started process queue");
             using CachedSchemaRegistryClient schemaRegistry = new(new SchemaRegistryConfig { Url = _schemaServerAddress });
             using IConsumer<string, BookingData> consumer = new ConsumerBuilder<string, BookingData>(_consumerConfig)
             .SetValueDeserializer(new AvroDeserializer<BookingData>(schemaRegistry).AsSyncOverAsync())
@@ -74,10 +71,7 @@ namespace HotelBookingBackend.Consumer
 
                         // Don't want to block consume loop, so starting new Task for each message  
 
-                        int currentNumAttempts = 0;
-                        bool committed = false;
-
-                        DataAccess.BookingData dbBookingData = new()
+                        DataAccess.BookingDataDb dbBookingData = new()
                         {
                             AmountOfBeds = consumeResult.Message.Value.AmountOfBeds,
                             City = consumeResult.Message.Value.City,
@@ -91,31 +85,30 @@ namespace HotelBookingBackend.Consumer
                         {
                             await _boookingDataService.CreateAsync(dbBookingData);
                             consumer.Commit(consumeResult);
-                            committed = true;
-
-                            break;
+                            _logger.LogInformation(consumeResult.Message.Value.HotelName);
                         }
                         catch (Exception ex)
                         {
                             //@Todo: What should happen here?
                             // Retry x time after x minutes?
                             // log
+                            _logger.LogError(ex, "Error during saving data from kafka");
                         }
                     }
                     catch (ConsumeException ex)
                     {
-                        // log
+                        _logger.LogError(ex, "Error during Kafka Booking Data Stream processing");
                     }
                 }
             }
             catch (OperationCanceledException ex)
             {
-                // log
+                _logger.LogError(ex, "Fatal error during Kafka Booking Data Stream processing");
+            }
+            finally
+            {
                 consumer.Close();
             }
-
-
-
         }
     }
 }

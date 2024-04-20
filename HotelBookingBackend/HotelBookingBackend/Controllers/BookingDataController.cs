@@ -19,7 +19,7 @@ namespace HotelBookingBackend.Controllers
         }
 
         [HttpGet(Name = "GetBookingData")]
-        public async Task<IEnumerable<DataAccess.BookingData>> Get()
+        public async Task<IEnumerable<DataAccess.BookingDataDb>> Get()
         {
             return await _bookingDataService.GetAsync();
         }

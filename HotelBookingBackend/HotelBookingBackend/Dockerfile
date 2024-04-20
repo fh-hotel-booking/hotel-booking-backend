@@ -8,9 +8,10 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["./HotelBookingBackend.csproj", "HotelBookingBackend/"]
+COPY ["./HotelBookingBackend.DataAccess", "./HotelBookingBackend.DataAccess"]
+COPY ["./HotelBookingBackend/HotelBookingBackend.csproj", "HotelBookingBackend/"]
 RUN dotnet restore "./HotelBookingBackend/HotelBookingBackend.csproj"
-COPY . ./HotelBookingBackend
+COPY ./HotelBookingBackend ./HotelBookingBackend
 WORKDIR "/src/HotelBookingBackend"
 RUN dotnet build "./HotelBookingBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
