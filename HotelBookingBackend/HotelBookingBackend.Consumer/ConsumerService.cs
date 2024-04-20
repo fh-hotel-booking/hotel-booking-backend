@@ -31,6 +31,7 @@ namespace HotelBookingBackend.Consumer
                 //GroupId = _config.GetValue<string>("Kafka:GroupId"),
                 //EnableAutoCommit = _config.GetValue<bool>("Kafka:Consumer:EnableAutoCommit"),
                 //AutoOffsetReset = (AutoOffsetReset)_config.GetValue<int>("Kafka:Consumer:AutoOffsetReset")
+                EnableAutoCommit = false
             };
             _topic = Environment.GetEnvironmentVariable(env_producer_topic_name) ?? "booking";
             _maxNumAttempts = 5;
@@ -50,7 +51,7 @@ namespace HotelBookingBackend.Consumer
             return task;
         }
 
-        private void ProcessQueue(CancellationToken stoppingToken)
+        private async void ProcessQueue(CancellationToken stoppingToken)
         {
 
 
@@ -70,58 +71,57 @@ namespace HotelBookingBackend.Consumer
                         ConsumeResult<string, BookingData> consumeResult = consumer.Consume(stoppingToken);
 
                         // Don't want to block consume loop, so starting new Task for each message  
-                        Task.Run(async () =>
+
+                        int currentNumAttempts = 0;
+                        bool committed = false;
+
+
+                        while (currentNumAttempts < _maxNumAttempts)
                         {
-                            int currentNumAttempts = 0;
-                            bool committed = false;
+                            currentNumAttempts++;
 
+                            // SendDataAsync is a method that sends http request to some end-points 
+                            //@TODO: Impl database saving
+                            var response = await Helper.SendDataAsync(consumeResult.Value, _config, _logger);
 
-                            while (currentNumAttempts < _maxNumAttempts)
-                            {
-                                currentNumAttempts++;
-
-                                // SendDataAsync is a method that sends http request to some end-points 
-                                // Database Save Endpoint
-                                var response = await Helper.SendDataAsync(consumeResult.Value, _config, _logger);
-
-                                if (response != null && response.Code >= 0)
-                                {
-                                    try
-                                    {
-                                        consumer.Commit(consumeResult);
-                                        committed = true;
-
-                                        break;
-                                    }
-                                    catch (KafkaException ex)
-                                    {
-                                        // log
-                                    }
-                                }
-                                else
-                                {
-                                    // log
-                                }
-
-                                if (currentNumAttempts < _maxNumAttempts)
-                                {
-                                    // Delay between tries
-                                    await Task.Delay(TimeSpan.FromSeconds(_retryIntervalInSec));
-                                }
-                            }
-
-                            if (!committed)
+                            if (response != null && response.Code >= 0)
                             {
                                 try
                                 {
                                     consumer.Commit(consumeResult);
+                                    committed = true;
+
+                                    break;
                                 }
                                 catch (KafkaException ex)
                                 {
                                     // log
                                 }
                             }
-                        }, stoppingToken);
+                            else
+                            {
+                                // log
+                            }
+
+                            if (currentNumAttempts < _maxNumAttempts)
+                            {
+                                // Delay between tries
+                                //@TODO: Impl wait time
+                            }
+                        }
+
+                        if (!committed)
+                        {
+                            try
+                            {
+                                consumer.Commit(consumeResult);
+                            }
+                            catch (KafkaException ex)
+                            {
+                                // log
+                            }
+                        }
+
                     }
                     catch (ConsumeException ex)
                     {
