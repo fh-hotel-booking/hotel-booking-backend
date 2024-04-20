@@ -49,7 +49,7 @@ namespace HotelBookingBackend.DataGenerator
                 {
                     try
                     {
-                        var schemaId = await schemaRegistry.RegisterSchemaAsync(schemaSubjectName, schemaAvsc.ToString());
+                        var schemaId = await schemaRegistry.RegisterSchemaAsync(schemaSubjectName, new Schema(schemaAvsc.ToString(), SchemaType.Avro));
                         var result = await producer.ProduceAsync(
                             topicName,
                             new Message<string, BookingData>() { 

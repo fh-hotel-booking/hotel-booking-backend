@@ -1,0 +1,19 @@
+﻿{
+    "namespace": "at.technikum.hotelbooking.avro",
+    "name": "AverageHotelPrice",
+    "type": "record",
+    "fields": [
+        {
+            "name": "hotel_name",
+            "type": "string"
+        },
+		{
+            "name":"prices",
+            "type": {
+                "type": "array",
+                "items": "long"
+            },
+            "default": []
+        }
+    ]
+}
