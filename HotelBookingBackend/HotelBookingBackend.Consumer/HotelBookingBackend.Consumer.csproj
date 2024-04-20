@@ -9,7 +9,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<PackageReference Include="Confluent.Kafka" Version="2.3.0" />
+	<PackageReference Include="Confluent.SchemaRegistry" Version="2.3.0" />
+	<PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="BookingData.cs">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="BookingData.avsc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

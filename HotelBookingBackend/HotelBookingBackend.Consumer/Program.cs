@@ -4,10 +4,10 @@ namespace HotelBookingBackend.Consumer
     {
         public static void Main(string[] args)
         {
-            var builder = Host.CreateApplicationBuilder(args);
-            builder.Services.AddHostedService<Worker>();
+            HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+            builder.Services.AddHostedService<ConsumerService>();
 
-            var host = builder.Build();
+            IHost host = builder.Build();
             host.Run();
         }
     }
