@@ -24,6 +24,11 @@ namespace HotelBookingBackend.DataAccess
         {
             return await _bookingDataCollection.Find(_ => true).ToListAsync();
         }
+        
+        public async Task<List<BookingDataDb>> GetAsyncFilter(String hotelName)
+        {
+            return await _bookingDataCollection.Find(_ => _.HotelName.Contains(hotelName)).ToListAsync();
+        }
 
         public async Task CreateAsync(BookingDataDb newBook)
         {

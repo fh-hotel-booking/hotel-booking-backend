@@ -19,9 +19,14 @@ namespace HotelBookingBackend.Controllers
         }
 
         [HttpGet(Name = "GetBookingData")]
-        public async Task<IEnumerable<DataAccess.BookingDataDb>> Get()
+        public async Task<IEnumerable<DataAccess.BookingDataDb>> Get([FromQuery(Name = "hotelName")] string? hotelName)
         {
-            return await _bookingDataService.GetAsync();
+            if (hotelName == null)
+            {
+                return await _bookingDataService.GetAsync();
+            }
+
+            return await _bookingDataService.GetAsyncFilter(hotelName);
         }
     }
 }
