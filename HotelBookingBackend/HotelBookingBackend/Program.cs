@@ -4,8 +4,20 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
+        
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy(name: MyAllowSpecificOrigins,
+                builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200");
+                });
+        });
+        
         // Add services to the container.
 
         builder.Services.AddControllers();
@@ -23,6 +35,7 @@ internal class Program
             app.UseSwaggerUI();
         }
 
+        app.UseCors(MyAllowSpecificOrigins);
         app.UseAuthorization();
 
         app.MapControllers();

@@ -1,4 +1,5 @@
 using HotelBookingBackend.DataAccess;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingBackend.Controllers
@@ -17,7 +18,8 @@ namespace HotelBookingBackend.Controllers
             _logger = logger;
             _bookingDataService = bookingDataService;
         }
-
+        
+        [EnableCors]
         [HttpGet(Name = "GetBookingData")]
         public async Task<IEnumerable<DataAccess.BookingDataDb>> Get([FromQuery(Name = "hotelName")] string? hotelName)
         {
